@@ -1,0 +1,31 @@
+// Players' maximum HP rate? (Default is 100)
+hp_rate: 200
+
+// Players' maximum SP rate? (Default is 100)
+sp_rate: 200
+
+// The amount of HP a player will respawn with, 0 is default.
+// (Unit is in percentage of total HP, 100 is full heal of HP, 0 is respawn with 1HP total.)
+restart_hp_rate: 100
+
+// The amount of SP a player will respawn with, 0 is default.
+// (Unit is in percentage of total SP, 100 is full heal of SP, 0 is respawn with 1SP total.)
+restart_sp_rate: 100
+
+// Maximum params/stats for each class. (str, agi, vit, int, dex, and luk)
+// 'max_trans_parameter' for trans classes (non-3rd trans classes)
+max_trans_parameter: 120
+
+// Are arrows/ammo consumed when used on a bow/gun?
+// 0 = No
+// 1 = Yes
+// 2 = Yes even for skills that do not specify arrow consumption when said 
+//     skill is weapon-based and used with ranged weapons (auto-guesses which 
+//     skills should consume ammo when it's acquired via a card or plagiarize)
+arrow_decrement: 0
+
+// The rate of time it takes to cast a spell (Note 2, 0 = No casting time)
+casting_rate: 50
+
+// Delay time after casting (Note 2)
+delay_rate: 50
