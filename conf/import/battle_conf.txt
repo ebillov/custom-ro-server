@@ -5,7 +5,7 @@ base_exp_rate: 1000
 job_exp_rate: 1000
 
 // Turn this on to allow a player to level up more than once from a kill. (Note 1)
-multi_level_up: no
+multi_level_up: yes
 
 // Maximum allowed 'level' value that can be sent in unit packets.
 // Use together with the aura_lv setting to tell when exactly to show the aura.
@@ -23,10 +23,10 @@ max_lv: 120
 aura_lv: 999
 
 // Players' maximum HP rate? (Default is 100)
-hp_rate: 200
+hp_rate: 150
 
 // Players' maximum SP rate? (Default is 100)
-sp_rate: 200
+sp_rate: 150
 
 // The amount of HP a player will respawn with, 0 is default.
 // (Unit is in percentage of total HP, 100 is full heal of HP, 0 is respawn with 1HP total.)
@@ -49,7 +49,7 @@ max_trans_parameter: 120
 arrow_decrement: 0
 
 // The rate of time it takes to cast a spell (Note 2, 0 = No casting time)
-casting_rate: 50
+casting_rate: 70
 
 // Delay time after casting (Note 2)
-delay_rate: 50
+delay_rate: 70
