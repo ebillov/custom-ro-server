@@ -30,11 +30,11 @@ sp_rate: 150
 
 // The amount of HP a player will respawn with, 0 is default.
 // (Unit is in percentage of total HP, 100 is full heal of HP, 0 is respawn with 1HP total.)
-restart_hp_rate: 100
+//restart_hp_rate: 100
 
 // The amount of SP a player will respawn with, 0 is default.
 // (Unit is in percentage of total SP, 100 is full heal of SP, 0 is respawn with 1SP total.)
-restart_sp_rate: 100
+//restart_sp_rate: 100
 
 // Maximum params/stats for each class. (str, agi, vit, int, dex, and luk)
 // 'max_trans_parameter' for trans classes (non-3rd trans classes)
