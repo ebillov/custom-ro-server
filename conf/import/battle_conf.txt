@@ -1,3 +1,24 @@
+// Rate at which exp. is given. (Note 2)
+base_exp_rate: 1000
+
+// Rate at which job exp. is given. (Note 2)
+job_exp_rate: 1000
+
+// Maximum allowed 'level' value that can be sent in unit packets.
+// Use together with the aura_lv setting to tell when exactly to show the aura.
+// NOTE: You also need to adjust the client if you want this to work.
+// NOTE: Default is 99. Values above 127 will probably behave incorrectly.
+// NOTE: If you don't know what this does, don't change it!!!
+max_lv: 120
+
+// Level required to display an aura.
+// NOTE: This assumes that sending max_lv to the client will display the aura.
+// NOTE: aura_lv must not be less than max_lv.
+// Example: If max_lv is 99 and aura_lv is 150, characters with level 99~149
+//          will be sent as being all level 98, and only characters with level
+//          150 or more will be reported as having level 99 and show an aura.
+aura_lv: 999
+
 // Players' maximum HP rate? (Default is 100)
 hp_rate: 200
 
