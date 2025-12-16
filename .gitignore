@@ -65,6 +65,7 @@ Thumbs.db
 
 # /db/
 /db/import
+!/db/import/job_stats.yml
 
 # /conf/
 /conf/import
