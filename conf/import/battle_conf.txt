@@ -49,7 +49,13 @@ max_trans_parameter: 120
 arrow_decrement: 0
 
 // The rate of time it takes to cast a spell (Note 2, 0 = No casting time)
-casting_rate: 70
+casting_rate: 50
 
 // Delay time after casting (Note 2)
 delay_rate: 70
+
+// Visible area size (how many squares away from a player they can see)
+area_size: 32
+
+// Maximum walk path (how many cells a player can walk going to cursor)
+max_walk_path: 32
