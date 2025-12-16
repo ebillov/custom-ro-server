@@ -23,10 +23,10 @@ max_lv: 120
 aura_lv: 999
 
 // Players' maximum HP rate? (Default is 100)
-hp_rate: 150
+hp_rate: 125
 
 // Players' maximum SP rate? (Default is 100)
-sp_rate: 150
+sp_rate: 125
 
 // The amount of HP a player will respawn with, 0 is default.
 // (Unit is in percentage of total HP, 100 is full heal of HP, 0 is respawn with 1HP total.)
