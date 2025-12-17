@@ -6947,12 +6947,11 @@ ACMD_FUNC(aaon)
 		return 0;
 	}
 
-	if (sd->state.aaondialog) {
-		clif_displaymessage(sd->fd, "You cannot open the Auto Attack dialog while it is already opened.");
+	if (sd->npc_id != 0) {
+		clif_displaymessage(sd->fd, "Please close any active dialog.");
 		return 0;
 	}
 
-	sd->state.aaondialog = 1;
 	npc_event_do_id("AaOnCommandDialog::OnCommand", sd->id);
 
 	return 0;
@@ -6993,7 +6992,6 @@ ACMD_FUNC(aaoff)
 	}
 
 	sd->state.autoattack = 0;
-	sd->state.aaondialog = 0;
 	clif_displaymessage(sd->fd, "Auto attack disabled.");
 
 	// Stop timer
