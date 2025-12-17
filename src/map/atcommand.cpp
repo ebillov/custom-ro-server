@@ -6970,6 +6970,26 @@ ACMD_FUNC(start_auto_attack)
 		return 0;
 	}
 
+	// Get the teleport delay value
+	// int64 uid = reference_uid(add_str("#teleport_auto_attack_delay"), 0);
+	// const char* val = pc_readaccountreg2str(sd, uid);
+	// if (val && *val) {
+	// 	sd->autoattack_teleport_delay = atoi(val);
+	// } else {
+	// 	sd->autoattack_teleport_delay = 5000; // default
+	// }
+
+	if (sd->autoattack_teleport_delay <= 0){
+		sd->autoattack_teleport_delay = 5000; // Default delay in milliseconds
+	} else if (sd->autoattack_teleport_delay){
+		sd->autoattack_teleport_delay = sd->autoattack_teleport_delay * 1000; // Convert to milliseconds
+	}
+
+	// Initialize delay tracking
+	if (sd->autoattack_last_teleport_tick == 0){
+		sd->autoattack_last_teleport_tick = gettick();
+	}
+
 	sd->state.autoattack = 1;
 	clif_displaymessage(sd->fd, "Auto attack enabled.");
 

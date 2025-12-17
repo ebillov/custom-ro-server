@@ -855,6 +855,9 @@ public:
 	enum npc_timeout_type npc_idle_type;
 #endif
 	int32 autoattack_timer;
+	int64_t autoattack_teleport_delay; //Seconds remaining for teleport delay (value in milliseconds)
+	int64_t autoattack_last_teleport_tick;     // when teleport delay started
+	int64_t autoattack_last_teleport_call_tick; // last time auto_attack_teleport() was executed
 	char last_auto_message[128];
 
 	std::vector<std::shared_ptr<s_combos>> combos;

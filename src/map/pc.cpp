@@ -16133,6 +16133,56 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
 }
 
 /*==========================================
+ * A teleport function
+ *------------------------------------------*/
+ void auto_attack_teleport(intptr_t data)
+{
+	map_session_data *sd = (map_session_data *)data;
+
+	if (sd == nullptr) {
+		return;
+	}
+
+    bool canTeleport = false;
+    int wing_slot = -1;
+
+    // 1. Check Fly Wing in inventory (default ID 601)
+    wing_slot = pc_search_inventory(sd, 601);
+    if (wing_slot >= 0) {
+        // Consume one Fly Wing
+        pc_delitem(sd, wing_slot, 1, 0, 0, LOG_TYPE_CONSUME);
+        clif_displaymessage(sd->fd, "Fly Wing consumed.");
+        canTeleport = true;
+    } else {
+        // 2. Check Teleport skill
+        int skill_lv = pc_checkskill(sd, AL_TELEPORT);
+        if (skill_lv > 0) {
+            // Teleport skill SP cost (default: 10 SP for level 1, 9 SP for level 2)
+            int sp_cost = (skill_lv == 1 ? 10 : 9);
+
+            if (sd->status.sp >= sp_cost) {
+                // Deduct SP
+                sd->status.sp -= sp_cost;
+				clif_updatestatus(*sd, SP_SP);
+                clif_displaymessage(sd->fd, "SP consumed for Teleport skill.");
+                canTeleport = true;
+            } else {
+                clif_displaymessage(sd->fd, "Not enough SP to use Teleport skill.");
+            }
+        }
+    }
+
+    if (canTeleport) {
+        // Teleport to random location on current map
+        pc_randomwarp(sd, CLR_TELEPORT);
+        clif_displaymessage(sd->fd, "Teleported!");
+    } else {
+        clif_displaymessage(sd->fd, "No Fly Wing or usable Teleport skill available.");
+    }
+
+}
+
+/*==========================================
  * Auto attack timer function
  *------------------------------------------*/
 int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
@@ -16228,6 +16278,16 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		}
 		// Continue timer every 1 second
 		sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+
+		// Check if teleport delay has passed
+		if (tick - sd->autoattack_last_teleport_tick >= sd->autoattack_teleport_delay) {
+			// Run auto_attack_teleport() every 5 seconds
+			if (tick - sd->autoattack_last_teleport_call_tick >= sd->autoattack_teleport_delay) {
+				auto_attack_teleport((intptr_t)sd); // <-- your custom teleport function
+				sd->autoattack_last_teleport_call_tick = tick;
+			}
+		}
+
 	}
 	return 0;
 }
