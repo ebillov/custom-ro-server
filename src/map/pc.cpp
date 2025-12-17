@@ -16149,6 +16149,9 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		return 0;
 	}
 
+	//Set character effect to stoned state (only animation is applied)
+	clif_specialeffect(sd, 963, AREA);
+
 	// Find nearby monster
 	block_list *target = nullptr;
 	int32 range = AREA_SIZE; // or sd->battle_status.rhw.range
