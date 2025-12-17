@@ -1,0 +1,43 @@
+// Invisible NPC that handles the dialog
+-	script	AaOnCommandDialog	-1,{
+
+    OnCommand:
+        mes "^FF0000[Auto-Attack System]^000000";
+        if(#teleport_auto_attack_delay){
+            mes "Teleport Delay: ^FF0000" + #teleport_auto_attack_delay + " seconds^000000 delay to teleport when no target is found.";
+        } else {
+            mes "Teleport Delay: ^FF0000Not Set^000000";
+        }
+        mes "Choose an option:";
+        menu "Start Auto",L_StartAuto,
+            "Teleport Delay",L_TeleportDelay;
+
+    L_StartAuto:
+        mes "Character will start auto-attacking monsters.";
+        close2;
+        // Run an atcommand from script
+        atcommand "@start_auto_attack";
+        end;
+
+    L_TeleportDelay:
+        clear;
+        mes "^FF0000[Auto-Attack System | Teleport Delay]^000000";
+        mes "Enter teleport delay in seconds ^FF0000(minimum 2 seconds)^000000:";
+        input .@delay;
+
+        if (.@delay < 2) {
+            mes "Invalid value. Defaulting to ^FF00005 seconds^000000.";
+            set #teleport_auto_attack_delay, 5;
+        } else {
+            mes "Teleport delay set to ^FF0000" + .@delay + " seconds^000000.";
+            set #teleport_auto_attack_delay, .@delay;
+        }
+
+        menu "Back", L_Back;
+
+    L_Back:
+        clear;
+        // Return to the main menu
+        goto OnCommand;
+
+}

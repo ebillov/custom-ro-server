@@ -6936,9 +6936,33 @@ ACMD_FUNC(autoloot)
 }
 
 /*==========================================
- * @aaon - Enable auto attack
+ * @aaon - Output the Auto Attack Dialog
  *------------------------------------------*/
 ACMD_FUNC(aaon)
+{
+	nullpo_retr(-1, sd);
+
+	if (sd->state.autoattack) {
+		clif_displaymessage(sd->fd, "Auto attack is already enabled.");
+		return 0;
+	}
+
+	if (sd->state.aaondialog) {
+		clif_displaymessage(sd->fd, "You cannot open the Auto Attack dialog while it is already opened.");
+		return 0;
+	}
+
+	sd->state.aaondialog = 1;
+	npc_event_do_id("AaOnCommandDialog::OnCommand", sd->id);
+
+	return 0;
+
+}
+
+/*==========================================
+ * @start_auto_attack - Start Auto Attack
+ *------------------------------------------*/
+ACMD_FUNC(start_auto_attack)
 {
 	nullpo_retr(-1, sd);
 
@@ -6969,6 +6993,7 @@ ACMD_FUNC(aaoff)
 	}
 
 	sd->state.autoattack = 0;
+	sd->state.aaondialog = 0;
 	clif_displaymessage(sd->fd, "Auto attack disabled.");
 
 	// Stop timer
@@ -11671,6 +11696,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(changelook),
 		ACMD_DEF(autoloot),
 		ACMD_DEF(aaon),
+		ACMD_DEF(start_auto_attack),
 		ACMD_DEF(aaoff),
 		ACMD_DEF(autolootitem),
 		ACMD_DEF(autoloottype),

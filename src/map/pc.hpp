@@ -437,6 +437,7 @@ public:
 		uint32 banking : 1; //1 when we using the banking system 0 when closed
 		uint32 hpmeter_visible : 1;
 		uint32 autoattack : 1;
+		uint32 aaondialog : 1;
 		unsigned disable_atcommand_on_npc : 1; //Prevent to use atcommand while talking with NPC [Kichi]
 		uint8 isBoundTrading; // Player is currently add bound item to trade list [Cydh]
 		bool ignoretimeout; // Prevent the SECURE_NPCTIMEOUT function from closing current script.
