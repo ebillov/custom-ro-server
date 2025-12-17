@@ -6936,6 +6936,51 @@ ACMD_FUNC(autoloot)
 }
 
 /*==========================================
+ * @aaon - Enable auto attack
+ *------------------------------------------*/
+ACMD_FUNC(aaon)
+{
+	nullpo_retr(-1, sd);
+
+	if (sd->state.autoattack) {
+		clif_displaymessage(sd->fd, "Auto attack is already enabled.");
+		return 0;
+	}
+
+	sd->state.autoattack = 1;
+	clif_displaymessage(sd->fd, "Auto attack enabled.");
+
+	// Start timer
+	sd->autoattack_timer = add_timer(gettick() + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+
+	return 0;
+}
+
+/*==========================================
+ * @aaoff - Disable auto attack
+ *------------------------------------------*/
+ACMD_FUNC(aaoff)
+{
+	nullpo_retr(-1, sd);
+
+	if (!sd->state.autoattack) {
+		clif_displaymessage(sd->fd, "Auto attack is already disabled.");
+		return 0;
+	}
+
+	sd->state.autoattack = 0;
+	clif_displaymessage(sd->fd, "Auto attack disabled.");
+
+	// Stop timer
+	if (sd->autoattack_timer != INVALID_TIMER) {
+		delete_timer(sd->autoattack_timer, pc_autoattack_timer);
+		sd->autoattack_timer = INVALID_TIMER;
+	}
+
+	return 0;
+}
+
+/*==========================================
  * @alootid
  *------------------------------------------*/
 ACMD_FUNC(autolootitem)
@@ -11625,6 +11670,8 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(disguiseall),
 		ACMD_DEF(changelook),
 		ACMD_DEF(autoloot),
+		ACMD_DEF(aaon),
+		ACMD_DEF(aaoff),
 		ACMD_DEF(autolootitem),
 		ACMD_DEF(autoloottype),
 		ACMD_DEF(mobinfo),

@@ -436,6 +436,7 @@ public:
 		bool hold_recalc;
 		uint32 banking : 1; //1 when we using the banking system 0 when closed
 		uint32 hpmeter_visible : 1;
+		uint32 autoattack : 1;
 		unsigned disable_atcommand_on_npc : 1; //Prevent to use atcommand while talking with NPC [Kichi]
 		uint8 isBoundTrading; // Player is currently add bound item to trade list [Cydh]
 		bool ignoretimeout; // Prevent the SECURE_NPCTIMEOUT function from closing current script.
@@ -853,6 +854,8 @@ public:
 	/* */
 	enum npc_timeout_type npc_idle_type;
 #endif
+	int32 autoattack_timer;
+	char last_auto_message[128];
 
 	std::vector<std::shared_ptr<s_combos>> combos;
 
@@ -1770,5 +1773,7 @@ void pc_macro_reporter_process(map_session_data &sd, int32 reporter_account_id =
 #ifdef MAP_GENERATOR
 void pc_reputation_generate();
 #endif
+
+int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data);
 
 #endif /* PC_HPP */

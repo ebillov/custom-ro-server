@@ -2142,6 +2142,7 @@ bool pc_authok(map_session_data *sd, uint32 login_id2, time_t expiration_time, i
 	sd->npc_idle_type = NPCT_INPUT;
 	sd->state.ignoretimeout = false;
 #endif
+	sd->autoattack_timer = INVALID_TIMER;
 
 	sd->canuseitem_tick = tick;
 	sd->canusecashfood_tick = tick;
@@ -9753,6 +9754,10 @@ void pc_close_npc(map_session_data *sd,int32 flag)
 			sd->npc_idle_timer = INVALID_TIMER;
 		}
 #endif
+		if (sd->autoattack_timer != INVALID_TIMER) {
+			delete_timer(sd->autoattack_timer, pc_autoattack_timer);
+			sd->autoattack_timer = INVALID_TIMER;
+		}
 		if (sd->st) {
 			if (sd->st->state == CLOSE) {
 				clif_scriptclose( *sd, sd->npc_id );
@@ -16108,6 +16113,124 @@ void do_final_pc(void) {
 	captcha_db.clear();
 }
 
+/*==========================================
+ * Sub function for finding target
+ *------------------------------------------*/
+static int32 pc_autoattack_sub(block_list *bl, va_list ap)
+{
+	t_tick tick = va_arg(ap, t_tick);
+	block_list **target = va_arg(ap, block_list **);
+	map_session_data *sd = va_arg(ap, map_session_data *);
+
+	if (bl->type == BL_MOB) {
+		int32 dist_new = distance_bl(sd, bl);
+		if (*target == nullptr || dist_new < distance_bl(sd, *target)) {
+			*target = bl;
+		}
+	}
+
+	return 0;
+}
+
+/*==========================================
+ * Auto attack timer function
+ *------------------------------------------*/
+int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
+{
+	map_session_data *sd = (map_session_data *)data;
+	if (sd == nullptr || sd->state.autoattack == 0) {
+		sd->autoattack_timer = INVALID_TIMER;
+		return 0;
+	}
+
+	if (pc_isdead(sd)) {
+		sd->state.autoattack = 0;
+		sd->autoattack_timer = INVALID_TIMER;
+		return 0;
+	}
+
+	// Find nearby monster
+	block_list *target = nullptr;
+	int32 range = AREA_SIZE; // or sd->battle_status.rhw.range
+
+	map_foreachinrange(pc_autoattack_sub, sd, range, BL_MOB, tick, &target, sd);
+
+	if (target) {
+		int32 dist = distance_bl(sd, target);
+		int32 attack_range = sd->battle_status.rhw.range;
+		bool is_attacking = (sd->ud.attacktimer != INVALID_TIMER);
+		if (dist <= attack_range) {
+			// In range, attack
+			unit_attack(sd, target->id, 0);
+			const char *msg = "Auto attacking monster.";
+			if (strcmp(sd->last_auto_message, msg) != 0) {
+				clif_displaymessage(sd->fd, msg);
+				safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
+			}
+			// Continue timer based on ASPD
+			int32 delay = sd->battle_status.amotion;
+			if (delay < 100) delay = 100;
+			sd->autoattack_timer = add_timer(tick + delay, pc_autoattack_timer, sd->id, (intptr_t)sd);
+		} else if (!is_attacking) {
+			// Not in range and not attacking, look for another target - walk randomly
+			if (sd->ud.walktimer == INVALID_TIMER) {
+				int32 dx = rnd() % 21 - 10; // -10 to 10
+				int32 dy = rnd() % 21 - 10;
+				int32 new_x = sd->x + dx;
+				int32 new_y = sd->y + dy;
+				// Ensure within map bounds (basic check)
+				if (new_x >= 0 && new_x < sd->m && new_y >= 0 && new_y < sd->m) {
+					unit_walktoxy(sd, new_x, new_y, 0);
+				}
+			}
+			const char *msg = "Target out of range, looking for new target.";
+			if (strcmp(sd->last_auto_message, msg) != 0) {
+				clif_displaymessage(sd->fd, msg);
+				safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
+			}
+			sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+		} else {
+			// Out of range but already attacking, walk to the target
+			if (unit_walktoxy(sd, target->x, target->y, 0) == 0) {
+				const char *msg = "Moving to attack monster.";
+				if (strcmp(sd->last_auto_message, msg) != 0) {
+					clif_displaymessage(sd->fd, msg);
+					safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
+				}
+				sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+			} else {
+				// Path blocked, ignore this target
+				const char *msg = "Path blocked, ignoring target.";
+				if (strcmp(sd->last_auto_message, msg) != 0) {
+					clif_displaymessage(sd->fd, msg);
+					safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
+				}
+				sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+			}
+		}
+	} else {
+		// No target, walk randomly to find targets
+		if (sd->ud.walktimer == INVALID_TIMER) {
+			int32 dx = rnd() % 21 - 10; // -10 to 10
+			int32 dy = rnd() % 21 - 10;
+			int32 new_x = sd->x + dx;
+			int32 new_y = sd->y + dy;
+			// Ensure within map bounds (basic check)
+			if (new_x >= 0 && new_x < sd->m && new_y >= 0 && new_y < sd->m) {
+				unit_walktoxy(sd, new_x, new_y, 0);
+			}
+		}
+		const char *msg = "Looking for target monster.";
+		if (strcmp(sd->last_auto_message, msg) != 0) {
+			clif_displaymessage(sd->fd, msg);
+			safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
+		}
+		// Continue timer every 1 second
+		sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+	}
+	return 0;
+}
+
 void do_init_pc(void) {
 
 	itemcd_db = idb_alloc(DB_OPT_RELEASE_DATA);
@@ -16135,6 +16258,8 @@ void do_init_pc(void) {
 	add_timer_func_list(pc_autotrade_timer, "pc_autotrade_timer");
 	add_timer_func_list(pc_on_expire_active, "pc_on_expire_active");
 	add_timer_func_list(pc_macro_detector_timeout, "pc_macro_detector_timeout");
+
+	add_timer_func_list(pc_autoattack_timer, "pc_autoattack_timer");
 
 	add_timer(gettick() + autosave_interval, pc_autosave, 0, 0);
 
