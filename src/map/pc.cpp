@@ -16173,15 +16173,14 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 			sd->autoattack_timer = add_timer(tick + delay, pc_autoattack_timer, sd->id, (intptr_t)sd);
 		} else if (!is_attacking) {
 			// Not in range and not attacking, look for another target - walk randomly
-			if (sd->ud.walktimer == INVALID_TIMER) {
-				int32 dx = rnd() % 21 - 10; // -10 to 10
-				int32 dy = rnd() % 21 - 10;
-				int32 new_x = sd->x + dx;
-				int32 new_y = sd->y + dy;
-				// Ensure within map bounds (basic check)
-				if (new_x >= 0 && new_x < sd->m && new_y >= 0 && new_y < sd->m) {
-					unit_walktoxy(sd, new_x, new_y, 0);
-				}
+			int32 dx = rnd() % 21 - 10; // -10 to 10
+			int32 dy = rnd() % 21 - 10;
+			int32 new_x = sd->x + dx;
+			int32 new_y = sd->y + dy;
+			// Ensure within map bounds
+			struct map_data *md = map_getmapdata(sd->m);
+			if (new_x >= 0 && new_x < md->xs && new_y >= 0 && new_y < md->ys) {
+				unit_walktoxy(sd, new_x, new_y, 0);
 			}
 			const char *msg = "Target out of range, looking for new target.";
 			if (strcmp(sd->last_auto_message, msg) != 0) {
@@ -16210,15 +16209,14 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		}
 	} else {
 		// No target, walk randomly to find targets
-		if (sd->ud.walktimer == INVALID_TIMER) {
-			int32 dx = rnd() % 21 - 10; // -10 to 10
-			int32 dy = rnd() % 21 - 10;
-			int32 new_x = sd->x + dx;
-			int32 new_y = sd->y + dy;
-			// Ensure within map bounds (basic check)
-			if (new_x >= 0 && new_x < sd->m && new_y >= 0 && new_y < sd->m) {
-				unit_walktoxy(sd, new_x, new_y, 0);
-			}
+		int32 dx = rnd() % 21 - 10; // -10 to 10
+		int32 dy = rnd() % 21 - 10;
+		int32 new_x = sd->x + dx;
+		int32 new_y = sd->y + dy;
+		// Ensure within map bounds
+		struct map_data *md = map_getmapdata(sd->m);
+		if (new_x >= 0 && new_x < md->xs && new_y >= 0 && new_y < md->ys) {
+			unit_walktoxy(sd, new_x, new_y, 0);
 		}
 		const char *msg = "Looking for target monster.";
 		if (strcmp(sd->last_auto_message, msg) != 0) {
