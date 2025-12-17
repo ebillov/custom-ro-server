@@ -6995,7 +6995,7 @@ ACMD_FUNC(aaoff)
 	clif_displaymessage(sd->fd, "Auto attack disabled.");
 
 	//Turn off the effect
-	clif_specialeffect(sd, 963, SELF);
+	clif_specialeffect_remove(sd, 963, SELF, sd);
 
 	// Stop timer
 	if (sd->autoattack_timer != INVALID_TIMER) {
