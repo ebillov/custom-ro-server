@@ -16164,6 +16164,16 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
                 // Deduct SP
                 sd->status.sp -= sp_cost;
 				clif_updatestatus(*sd, SP_SP);
+
+				char msg[128];
+
+				snprintf(msg, sizeof(msg), "Char SP was: %d", sd->status.sp);
+				clif_displaymessage(sd->fd, msg);
+
+				snprintf(msg, sizeof(msg), "SP Cost was: %d", sp_cost);
+				clif_displaymessage(sd->fd, msg);
+
+
                 clif_displaymessage(sd->fd, "SP consumed for Teleport skill.");
                 canTeleport = true;
             } else {
@@ -16224,6 +16234,7 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 			int32 delay = sd->battle_status.amotion;
 			if (delay < 100) delay = 100;
 			sd->autoattack_timer = add_timer(tick + delay, pc_autoattack_timer, sd->id, (intptr_t)sd);
+			sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
 		} else if (!is_attacking) {
 			// Not in range and not attacking, look for another target - walk randomly
 			int32 dx = rnd() % 21 - 10; // -10 to 10
@@ -16250,6 +16261,7 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 					safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
 				}
 				sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+				sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
 			} else {
 				// Path blocked, ignore this target
 				const char *msg = "Path blocked, ignoring target.";
@@ -16283,8 +16295,8 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		if (tick - sd->autoattack_last_teleport_tick >= sd->autoattack_teleport_delay) {
 			// Run auto_attack_teleport() every 5 seconds
 			if (tick - sd->autoattack_last_teleport_call_tick >= sd->autoattack_teleport_delay) {
-				auto_attack_teleport((intptr_t)sd); // <-- your custom teleport function
-				sd->autoattack_last_teleport_call_tick = tick;
+				auto_attack_teleport((intptr_t)sd); //Execute teleport function
+				sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
 			}
 		}
 

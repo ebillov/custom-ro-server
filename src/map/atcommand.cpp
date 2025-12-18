@@ -6971,8 +6971,16 @@ ACMD_FUNC(start_auto_attack)
 	}
 
 	// Get the teleport delay value
-	// int64 uid = reference_uid(add_str("#teleport_auto_attack_delay"), 0);
+	int64 uid = reference_uid(add_str("#teleport_auto_attack_delay"), 0);
+	char msg[128];
+	snprintf(msg, sizeof(msg), "Registry UID was: %" PRId64, uid);
+	clif_displaymessage(sd->fd, msg);
+
 	// const char* val = pc_readaccountreg2str(sd, uid);
+	// int64 delay = atoll(val); // convert string to int64
+	// snprintf(msg, sizeof(msg), "Teleport delay value was: %" PRId64, delay);
+	// clif_displaymessage(sd->fd, val);
+
 	// if (val && *val) {
 	// 	sd->autoattack_teleport_delay = atoi(val);
 	// } else {
