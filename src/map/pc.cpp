@@ -16220,7 +16220,8 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 
 	if (target) {
 		int32 dist = distance_bl(sd, target);
-		int32 attack_range = sd->battle_status.rhw.range;
+		// int32 attack_range = sd->battle_status.rhw.range;
+		int32 attack_range = 14;
 		bool is_attacking = (sd->ud.attacktimer != INVALID_TIMER);
 		if (dist <= attack_range) {
 			// In range, attack
