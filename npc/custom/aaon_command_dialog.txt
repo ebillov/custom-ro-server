@@ -25,8 +25,8 @@
         mes "Enter teleport delay in seconds ^FF0000(minimum 2 seconds)^000000:";
         input .@delay;
 
-        if (.@delay < 2) {
-            mes "Invalid value. Defaulting to ^FF00005 seconds^000000.";
+        if (.@delay < 2 || .@delay > 10) {
+            mes "Invalid value. You can only set a minimum of ^FF00002 seconds^000000 and up to ^FF000010 seconds^000000. Defaulting to ^FF00005 seconds^000000.";
             set #teleport_auto_attack_delay, 5;
         } else {
             mes "Teleport delay set to ^FF0000" + .@delay + " seconds^000000.";

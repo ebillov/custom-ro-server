@@ -6972,25 +6972,17 @@ ACMD_FUNC(start_auto_attack)
 
 	// Get the teleport delay value
 	int64 uid = reference_uid(add_str("#teleport_auto_attack_delay"), 0);
-	char msg[128];
-	snprintf(msg, sizeof(msg), "Registry UID was: %" PRId64, uid);
-	clif_displaymessage(sd->fd, msg);
+	int64 delay = pc_readaccountreg2(sd, uid); // returns 0 if not set
 
-	// const char* val = pc_readaccountreg2str(sd, uid);
-	// int64 delay = atoll(val); // convert string to int64
+	// char msg[128];
 	// snprintf(msg, sizeof(msg), "Teleport delay value was: %" PRId64, delay);
-	// clif_displaymessage(sd->fd, val);
+	// clif_displaymessage(sd->fd, msg);
 
-	// if (val && *val) {
-	// 	sd->autoattack_teleport_delay = atoi(val);
-	// } else {
-	// 	sd->autoattack_teleport_delay = 5000; // default
-	// }
-
-	if (sd->autoattack_teleport_delay <= 0){
-		sd->autoattack_teleport_delay = 5000; // Default delay in milliseconds
-	} else if (sd->autoattack_teleport_delay){
-		sd->autoattack_teleport_delay = sd->autoattack_teleport_delay * 1000; // Convert to milliseconds
+	if (delay <= 0) {
+		sd->autoattack_teleport_delay = 5000; // Default delay in ms
+	} else {
+		// Convert to ms and enforce minimum of 2000 ms
+		sd->autoattack_teleport_delay = std::max(delay * 1000, (int64)2000);
 	}
 
 	// Initialize delay tracking

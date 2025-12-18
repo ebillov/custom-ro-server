@@ -16151,7 +16151,7 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
     if (wing_slot >= 0) {
         // Consume one Fly Wing
         pc_delitem(sd, wing_slot, 1, 0, 0, LOG_TYPE_CONSUME);
-        clif_displaymessage(sd->fd, "Fly Wing consumed.");
+        // clif_displaymessage(sd->fd, "Fly Wing consumed.");
         canTeleport = true;
     } else {
         // 2. Check Teleport skill
@@ -16165,19 +16165,19 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
                 sd->status.sp -= sp_cost;
 				clif_updatestatus(*sd, SP_SP);
 
-				char msg[128];
+				// char msg[128];
 
-				snprintf(msg, sizeof(msg), "Char SP was: %d", sd->status.sp);
-				clif_displaymessage(sd->fd, msg);
+				// snprintf(msg, sizeof(msg), "Char SP was: %d", sd->status.sp);
+				// clif_displaymessage(sd->fd, msg);
 
-				snprintf(msg, sizeof(msg), "SP Cost was: %d", sp_cost);
-				clif_displaymessage(sd->fd, msg);
+				// snprintf(msg, sizeof(msg), "SP Cost was: %d", sp_cost);
+				// clif_displaymessage(sd->fd, msg);
 
 
-                clif_displaymessage(sd->fd, "SP consumed for Teleport skill.");
+                // clif_displaymessage(sd->fd, "SP consumed for Teleport skill.");
                 canTeleport = true;
             } else {
-                clif_displaymessage(sd->fd, "Not enough SP to use Teleport skill.");
+                // clif_displaymessage(sd->fd, "Not enough SP to use Teleport skill.");
             }
         }
     }
@@ -16185,9 +16185,9 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
     if (canTeleport) {
         // Teleport to random location on current map
         pc_randomwarp(sd, CLR_TELEPORT);
-        clif_displaymessage(sd->fd, "Teleported!");
+        // clif_displaymessage(sd->fd, "Teleported!");
     } else {
-        clif_displaymessage(sd->fd, "No Fly Wing or usable Teleport skill available.");
+        // clif_displaymessage(sd->fd, "No Fly Wing or usable Teleport skill available.");
     }
 
 }
@@ -16273,6 +16273,20 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 			}
 		}
 	} else {
+
+		// char messagetest[128];
+		// snprintf(messagetest, sizeof(messagetest), "Teleport delay value was: %" PRId64, sd->autoattack_teleport_delay);
+		// clif_displaymessage(sd->fd, messagetest);
+
+		// Check if teleport delay has passed
+		if (tick - sd->autoattack_last_teleport_tick >= sd->autoattack_teleport_delay) {
+			// Run auto_attack_teleport() every 5 seconds
+			if (tick - sd->autoattack_last_teleport_call_tick >= sd->autoattack_teleport_delay) {
+				auto_attack_teleport((intptr_t)sd); //Execute teleport function
+				sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
+			}
+		}
+
 		// No target, walk randomly to find targets
 		int32 dx = rnd() % 21 - 10; // -10 to 10
 		int32 dy = rnd() % 21 - 10;
@@ -16290,15 +16304,6 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		}
 		// Continue timer every 1 second
 		sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
-
-		// Check if teleport delay has passed
-		if (tick - sd->autoattack_last_teleport_tick >= sd->autoattack_teleport_delay) {
-			// Run auto_attack_teleport() every 5 seconds
-			if (tick - sd->autoattack_last_teleport_call_tick >= sd->autoattack_teleport_delay) {
-				auto_attack_teleport((intptr_t)sd); //Execute teleport function
-				sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
-			}
-		}
 
 	}
 	return 0;
