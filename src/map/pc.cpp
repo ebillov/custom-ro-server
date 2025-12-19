@@ -16138,8 +16138,7 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
  void auto_attack_teleport(intptr_t data)
 {
 
-	//map_session_data *sd = (map_session_data *)data;
-	struct map_session_data *sd = (struct map_session_data *)(intptr_t)data;
+	map_session_data *sd = (map_session_data *)data;
 	if (sd == nullptr) {
 		return;
 	}
