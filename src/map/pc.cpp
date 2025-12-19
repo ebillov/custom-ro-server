@@ -16137,13 +16137,13 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
  *------------------------------------------*/
  void auto_attack_teleport(intptr_t data)
 {
-	map_session_data *sd = (map_session_data *)data;
 
+	//map_session_data *sd = (map_session_data *)data;
+	struct map_session_data *sd = (struct map_session_data *)(intptr_t)data;
 	if (sd == nullptr) {
 		return;
 	}
 
-    bool canTeleport = false;
     int wing_slot = -1;
 
     // 1. Check Fly Wing in inventory (default ID 601)
@@ -16151,8 +16151,7 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
     if (wing_slot >= 0) {
         // Consume one Fly Wing
         pc_delitem(sd, wing_slot, 1, 0, 0, LOG_TYPE_CONSUME);
-        // clif_displaymessage(sd->fd, "Fly Wing consumed.");
-        canTeleport = true;
+		pc_randomwarp(sd, CLR_TELEPORT);
     } else {
         // 2. Check Teleport skill
         int skill_lv = pc_checkskill(sd, AL_TELEPORT);
@@ -16164,30 +16163,9 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
                 // Deduct SP
                 sd->status.sp -= sp_cost;
 				clif_updatestatus(*sd, SP_SP);
-
-				// char msg[128];
-
-				// snprintf(msg, sizeof(msg), "Char SP was: %d", sd->status.sp);
-				// clif_displaymessage(sd->fd, msg);
-
-				// snprintf(msg, sizeof(msg), "SP Cost was: %d", sp_cost);
-				// clif_displaymessage(sd->fd, msg);
-
-
-                // clif_displaymessage(sd->fd, "SP consumed for Teleport skill.");
-                canTeleport = true;
-            } else {
-                // clif_displaymessage(sd->fd, "Not enough SP to use Teleport skill.");
+				pc_randomwarp(sd, CLR_TELEPORT);
             }
         }
-    }
-
-    if (canTeleport) {
-        // Teleport to random location on current map
-        pc_randomwarp(sd, CLR_TELEPORT);
-        // clif_displaymessage(sd->fd, "Teleported!");
-    } else {
-        // clif_displaymessage(sd->fd, "No Fly Wing or usable Teleport skill available.");
     }
 
 }
