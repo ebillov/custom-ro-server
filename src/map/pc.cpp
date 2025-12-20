@@ -16189,7 +16189,7 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 	//Get mapindex and verify if the autoattack instance mapindex is the same as the origin mapindex
 	if (sd->autoattack_origin_mapindex != sd->mapindex ) {
 		//Different map, get back to map origin
-		pc_setpos( sd, sd->autoattack_origin_mapindex, -1, -1, CLR_TELEPORT );
+		pc_setpos( sd, sd->autoattack_origin_mapindex, 0, 0, CLR_TELEPORT );
 	}
 
 	//Set character effect to stoned state (only animation is applied)
