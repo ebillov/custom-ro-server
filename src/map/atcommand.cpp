@@ -6976,6 +6976,7 @@ ACMD_FUNC(start_auto_attack)
 
 	// char msg[128];
 	// snprintf(msg, sizeof(msg), "Teleport delay value was: %" PRId64, delay);
+	// mapindex_getmapname( mapindex_id2name( sd->mapindex ), msg );
 	// clif_displaymessage(sd->fd, msg);
 
 	if (delay <= 0) {
@@ -6992,6 +6993,9 @@ ACMD_FUNC(start_auto_attack)
 
 	sd->state.autoattack = 1;
 	clif_displaymessage(sd->fd, "Auto attack enabled.");
+
+	//Set origin mapindex of autoattack
+	sd->autoattack_origin_mapindex = sd->mapindex;
 
 	// Start timer
 	sd->autoattack_timer = add_timer(gettick() + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
