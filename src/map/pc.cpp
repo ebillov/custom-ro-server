@@ -16208,6 +16208,15 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		int32 attack_range = 14;
 		bool is_attacking = (sd->ud.attacktimer != INVALID_TIMER);
 
+		char messagetest[128];
+		snprintf(messagetest, sizeof(messagetest), "Distance to target: %d, Attack range: %d", dist, attack_range);
+		clif_displaymessage(sd->fd, messagetest);
+
+		int32 mapcell = map_getcellp(m, target->x, target->y, CELL_CHKCLIFF);
+		snprintf(messagetest, sizeof(messagetest), "map_getcellp: %d", mapcell);
+		clif_displaymessage(sd->fd, messagetest);
+
+
 		if(dist <= attack_range && map_getcellp(m, target->x, target->y, CELL_CHKCLIFF)) {
 			// Target is on a cliff, ignore this target
 			const char *msg = "Target is on a cliff, ignoring target.";
