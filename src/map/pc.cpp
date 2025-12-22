@@ -16174,6 +16174,8 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
 int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 {
 	map_session_data *sd = (map_session_data *)data;
+	struct map_data *m = map_getmapdata(sd->m);
+
 	if (sd == nullptr || sd->state.autoattack == 0) {
 		sd->autoattack_timer = INVALID_TIMER;
 		return 0;
@@ -16205,7 +16207,16 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		// int32 attack_range = sd->battle_status.rhw.range;
 		int32 attack_range = 14;
 		bool is_attacking = (sd->ud.attacktimer != INVALID_TIMER);
-		if (dist <= attack_range) {
+
+		if(dist <= attack_range && map_getcellp(m, target->x, target->y, CELL_CHKCLIFF)) {
+			// Target is on a cliff, ignore this target
+			const char *msg = "Target is on a cliff, ignoring target.";
+			if (strcmp(sd->last_auto_message, msg) != 0) {
+				clif_displaymessage(sd->fd, msg);
+				safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
+			}
+			sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
+		} else if (dist <= attack_range) {
 			// In range, attack
 			unit_attack(sd, target->id, 0);
 			const char *msg = "Auto attacking monster.";
@@ -16245,7 +16256,7 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 				}
 				sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
 				sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
-			} else {
+			} else{
 				// Path blocked, ignore this target
 				const char *msg = "Path blocked, ignoring target.";
 				if (strcmp(sd->last_auto_message, msg) != 0) {
