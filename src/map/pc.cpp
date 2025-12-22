@@ -16157,12 +16157,11 @@ static int32 pc_autoattack_sub(block_list *bl, va_list ap)
         if (skill_lv > 0) {
             // Teleport skill SP cost (default: 10 SP for level 1, 9 SP for level 2)
             int sp_cost = (skill_lv == 1 ? 10 : 9);
-
             if (sd->status.sp >= sp_cost) {
                 // Deduct SP
-                sd->status.sp -= sp_cost;
-				clif_updatestatus(*sd, SP_SP);
-				pc_randomwarp(sd, CLR_TELEPORT);
+				if(status_charge(sd, 0, sp_cost)){
+					pc_randomwarp(sd, CLR_TELEPORT);
+				}
             }
         }
     }
