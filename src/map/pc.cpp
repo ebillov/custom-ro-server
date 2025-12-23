@@ -16205,30 +16205,11 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 	if (target) {
 		int32 dist = distance_bl(sd, target);
 		// int32 attack_range = sd->battle_status.rhw.range;
-		int32 attack_range = 14;
+		int32 attack_range = 14; //Default max range to search targets
 		bool is_attacking = (sd->ud.attacktimer != INVALID_TIMER);
 
-		char messagetest[128];
-		snprintf(messagetest, sizeof(messagetest), "Distance to target: %d, Attack range: %d", dist, attack_range);
-		clif_displaymessage(sd->fd, messagetest);
-
-		bool checkrange = false;
-		checkrange = battle_check_range(sd, target, sd->battle_status.rhw.range);
-		if(checkrange){
-			clif_displaymessage(sd->fd, "Target is in range");
-		} else {
-			clif_displaymessage(sd->fd, "Target is not in range");
-		}
-
-		if(dist <= attack_range && map_getcellp(m, target->x, target->y, CELL_CHKCLIFF)) {
-			// Target is on a cliff, ignore this target
-			const char *msg = "Target is on a cliff, ignoring target.";
-			if (strcmp(sd->last_auto_message, msg) != 0) {
-				clif_displaymessage(sd->fd, msg);
-				safestrncpy(sd->last_auto_message, msg, sizeof(sd->last_auto_message));
-			}
-			sd->autoattack_timer = add_timer(tick + 1000, pc_autoattack_timer, sd->id, (intptr_t)sd);
-		} else if (dist <= attack_range) {
+		//Check if in range and if the path is walkable
+		if (dist <= attack_range && unit_walktoxy(sd, target->x, target->y, 0) == 1) {
 			// In range, attack
 			unit_attack(sd, target->id, 0);
 			const char *msg = "Auto attacking monster.";
@@ -16243,8 +16224,8 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 			sd->autoattack_last_teleport_call_tick = tick; //Restart the teleport call timer
 		} else if (!is_attacking) {
 			// Not in range and not attacking, look for another target - walk randomly
-			int32 dx = rnd() % 21 - 10; // -10 to 10
-			int32 dy = rnd() % 21 - 10;
+			int32 dx = (rnd() % 41) - 20; // -20 to 20
+			int32 dy = (rnd() % 41) - 20;
 			int32 new_x = sd->x + dx;
 			int32 new_y = sd->y + dy;
 			// Ensure within map bounds
@@ -16294,8 +16275,8 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		}
 
 		// No target, walk randomly to find targets
-		int32 dx = rnd() % 21 - 10; // -10 to 10
-		int32 dy = rnd() % 21 - 10;
+		int32 dx = (rnd() % 41) - 20; // -20 to 20
+		int32 dy = (rnd() % 41) - 20;
 		int32 new_x = sd->x + dx;
 		int32 new_y = sd->y + dy;
 		// Ensure within map bounds
