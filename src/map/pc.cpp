@@ -16209,7 +16209,8 @@ int32 pc_autoattack_timer(int32 tid, int64 tick, int32 id, intptr_t data)
 		bool is_attacking = (sd->ud.attacktimer != INVALID_TIMER);
 
 		//Check if in range and if the path is walkable
-		if (dist <= attack_range && unit_walktoxy(sd, target->x, target->y, 0) == 1) {
+		walkpath_data wpd = { 0 };
+		if (dist <= attack_range && path_search(&wpd, sd->m, sd->x, sd->y, target->x, target->y, 1, CELL_CHKNOPASS)) {
 			// In range, attack
 			unit_attack(sd, target->id, 0);
 			const char *msg = "Auto attacking monster.";
